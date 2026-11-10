@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JalDost — Clean Water Safety Agent | Code for a Billion</title>
+<style>
+  :root { --blue:#0b6fa4; --dark:#083b57; --ok:#1a7f37; --warn:#b58900; --bad:#c0392b; --bg:#f4f8fb; }
+  * { box-sizing: border-box; font-family: system-ui, "Segoe UI", Arial, sans-serif; }
+  body { margin:0; background:var(--bg); color:#123; }
+  header { background:linear-gradient(135deg,var(--dark),var(--blue)); color:#fff; padding:22px 16px; }
+  header h1 { margin:0 0 4px; font-size:1.6rem; } header p { margin:2px 0; opacity:.92; }
+  main { max-width:880px; margin:0 auto; padding:16px; }
+  .card { background:#fff; border-radius:12px; padding:16px; margin:14px 0; box-shadow:0 1px 4px rgba(0,0,0,.08); }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; }
+  label { font-size:.85rem; font-weight:600; display:block; margin-bottom:4px; }
+  input, select { width:100%; padding:9px; border:1px solid #bcd; border-radius:8px; font-size:1rem; }
+  button { background:var(--blue); color:#fff; border:0; padding:12px 18px; border-radius:9px; font-size:1rem; cursor:pointer; }
+  button.secondary { background:#e8f1f7; color:var(--dark); }
+  .preset { margin-right:8px; margin-bottom:8px; }
+  #verdict { font-size:1.25rem; font-weight:700; padding:12px; border-radius:9px; display:none; }
+  .SAFE { background:#e5f5ea; color:var(--ok); } .CAUTION { background:#fdf3d7; color:var(--warn); } .UNSAFE { background:#fdecea; color:var(--bad); }
+  table { width:100%; border-collapse:collapse; font-size:.92rem; }
+  td, th { border-bottom:1px solid #e3ecf2; padding:7px 6px; text-align:left; }
+  .st-OK { color:var(--ok); font-weight:700; } .st-CAUTION { color:var(--warn); font-weight:700; } .st-UNSAFE { color:var(--bad); font-weight:700; }
+  #trace { font-family:ui-monospace, Menlo, Consolas, monospace; font-size:.82rem; background:#0d2231; color:#cfe8f5; border-radius:9px; padding:12px; white-space:pre-wrap; max-height:320px; overflow:auto; }
+  #trace .t { color:#7fd1ff; }
+  pre#report { white-space:pre-wrap; background:#fbfcfd; border:1px dashed #9db8c6; border-radius:9px; padding:12px; font-size:.9rem; }
+  .stat { text-align:center; } .stat b { font-size:1.35rem; color:var(--blue); display:block; }
+  footer { text-align:center; color:#567; font-size:.85rem; padding:18px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>💧 JalDost — Clean Water Safety Agent</h1>
+  <p>An agentic assistant for ASHA workers, ANMs and Village Water &amp; Sanitation Committees.</p>
+  <p>Enter field-test-kit (FTK) readings → the agent checks them against BIS IS 10500:2012, explains the risk, plans the fix, and drafts a bilingual report. 100% offline, no data leaves the phone.</p>
+</header>
+<main>
+
+  <div class="card">
+    <h2>Why this matters</h2>
+    <div class="grid">
+      <div class="stat"><b>600 million</b>people in India face high-to-extreme water stress (NITI Aayog)</div>
+      <div class="stat"><b>~200,000</b>deaths every year from inadequate access to safe water (NITI Aayog)</div>
+      <div class="stat"><b>387 districts</b>have parts where groundwater nitrate exceeds safe limits (CGWB)</div>
+      <div class="stat"><b>276 districts</b>have parts with excess fluoride in groundwater (CGWB)</div>
+    </div>
+    <p>Village FTK testing already happens under the Jal Jeevan Mission — but a raw reading means nothing to a health worker without the standards, the health meaning, and the next action. JalDost's agent supplies all three in under a minute.</p>
+  </div>
+
+  <div class="card">
+    <h2>1 · Water source</h2>
+    <div class="grid">
+      <div><label>Source name</label><input id="srcName" value="Handpump No. 3"></div>
+      <div><label>Village</label><input id="srcVillage" value="Rampur"></div>
+      <div><label>District</label><input id="srcDistrict" value="Nagaur"></div>
+      <div><label>Source type</label>
+        <select id="srcType"><option>Handpump</option><option>Open well</option><option>Tap (piped supply)</option><option>Borewell</option><option>Pond / surface</option></select></div>
+      <div><label>Tested by</label><input id="srcTester" value="ASHA worker (FTK)"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>2 · Field-test-kit readings</h2>
+    <p>Try a sample village, or type your own readings. Leave a field blank and watch the agent flag the data gap itself.</p>
+    <div>
+      <button class="secondary preset" onclick="loadPreset('safe')">Sample A — Safe source</button>
+      <button class="secondary preset" onclick="loadPreset('fluoride')">Sample B — Fluoride belt</button>
+      <button class="secondary preset" onclick="loadPreset('contaminated')">Sample C — Contaminated well</button>
+    </div>
+    <div class="grid">
+      <div><label>pH (6.5–8.5)</label><input id="f_ph" type="number" step="0.1" placeholder="e.g. 7.2"></div>
+      <div><label>TDS mg/L (≤500)</label><input id="f_tds" type="number" placeholder="e.g. 320"></div>
+      <div><label>Turbidity NTU (≤1)</label><input id="f_turbidity" type="number" step="0.1" placeholder="e.g. 0.8"></div>
+      <div><label>Nitrate mg/L (≤45)</label><input id="f_nitrate" type="number" placeholder="e.g. 12"></div>
+      <div><label>Fluoride mg/L (≤1.0)</label><input id="f_fluoride" type="number" step="0.1" placeholder="e.g. 0.6"></div>
+      <div><label>Iron mg/L (≤0.3)</label><input id="f_iron" type="number" step="0.01" placeholder="e.g. 0.1"></div>
+      <div><label>Coliform / E. coli</label>
+        <select id="f_coliform"><option value="">— not tested —</option><option value="absent">Absent</option><option value="present">Present</option></select></div>
+    </div>
+    <p><button onclick="runAgent()">▶ Run the Water Safety Agent</button></p>
+  </div>
+
+  <div class="card">
+    <h2>3 · Agent reasoning trace</h2>
+    <div id="trace">The agent's tool calls will appear here — perceive → look up standards → assess → compute risk → plan → report.</div>
+  </div>
+
+  <div class="card">
+    <h2>4 · Verdict &amp; findings</h2>
+    <div id="verdict"></div>
+    <div id="findings" style="margin-top:10px;"></div>
+  </div>
+
+  <div class="card">
+    <h2>5 · Field report (English + Hindi) — forward to PHC / Gram Panchayat</h2>
+    <pre id="report">Run the agent to generate the report.</pre>
+    <button class="secondary" onclick="copyReport()">Copy report</button>
+  </div>
+
+</main>
+<footer>
+  JalDost · Built for <b>Code for a Billion — Bharat Agentic-AI Hackathon 2026</b> (Code for India) · Track: Health ·
+  Standards: BIS IS 10500:2012 · Open source (MIT) · Runs fully offline in the browser.
+</footer>
+
+<script src="agent.js"></script>
+<script>
+const PRESETS = {
+  safe:        { ph:7.2, tds:320, turbidity:0.8, nitrate:12, fluoride:0.6, iron:0.10, coliform:"absent" },
+  fluoride:    { ph:7.8, tds:1450, turbidity:2.5, nitrate:28, fluoride:2.6, iron:0.20, coliform:"absent" },
+  contaminated:{ ph:6.9, tds:780, turbidity:7.0, nitrate:68, fluoride:0.8, iron:0.45, coliform:"present" }
+};
+function loadPreset(name) {
+  const p = PRESETS[name];
+  for (const k of Object.keys(p)) {
+    const el = document.getElementById("f_" + k);
+    if (el) el.value = p[k];
+  }
+}
+function readInputs() {
+  const num = id => { const v = document.getElementById(id).value; return v === "" ? "" : Number(v); };
+  return {
+    source: {
+      name: document.getElementById("srcName").value || "Water source",
+      village: document.getElementById("srcVillage").value || "—",
+      district: document.getElementById("srcDistrict").value || "—",
+      type: document.getElementById("srcType").value,
+      tester: document.getElementById("srcTester").value || "FTK tester"
+    },
+    readings: {
+      ph: num("f_ph"), tds: num("f_tds"), turbidity: num("f_turbidity"),
+      nitrate: num("f_nitrate"), fluoride: num("f_fluoride"), iron: num("f_iron"),
+      coliform: document.getElementById("f_coliform").value
+    }
+  };
+}
+function runAgent() {
+  const out = runWaterSafetyAgent(readInputs());
+  const traceEl = document.getElementById("trace");
+  traceEl.innerHTML = "";
+  out.trace.forEach((s, i) => {
+    const div = document.createElement("div");
+    div.innerHTML = `<span class="t">[${i + 1}] tool:${s.tool}</span> — `;
+    div.appendChild(document.createTextNode(s.note));
+    traceEl.appendChild(div);
+  });
+  const v = document.getElementById("verdict");
+  v.style.display = "block";
+  v.className = out.risk.level;
+  v.textContent = (out.risk.level === "SAFE" ? "✅ " : out.risk.level === "CAUTION" ? "⚠️ " : "⛔ ") +
+    out.risk.verdict + `  (risk score ${out.risk.score})` + (out.gaps.length ? " — PROVISIONAL: untested parameters remain." : "");
+  const rows = out.assessments.map(a =>
+    `<tr><td>${a.label}</td><td>${a.value}${a.unit ? " " + a.unit : ""}</td><td class="st-${a.status}">${a.status}</td><td>${a.detail}<br><em>${a.harm}</em></td></tr>`).join("");
+  document.getElementById("findings").innerHTML =
+    `<table><tr><th>Parameter</th><th>Reading</th><th>Status</th><th>Agent's reasoning</th></tr>${rows}</table>`;
+  document.getElementById("report").textContent = out.report;
+}
+function copyReport() {
+  navigator.clipboard && navigator.clipboard.writeText(document.getElementById("report").textContent);
+}
+loadPreset("contaminated");
+</script>
+</body>
+</html>
