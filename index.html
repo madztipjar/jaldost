@@ -4,99 +4,311 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>JalDost — Clean Water Safety Agent | Code for a Billion</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Hind:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  :root { --blue:#0b6fa4; --dark:#083b57; --ok:#1a7f37; --warn:#b58900; --bad:#c0392b; --bg:#f4f8fb; }
-  * { box-sizing: border-box; font-family: system-ui, "Segoe UI", Arial, sans-serif; }
-  body { margin:0; background:var(--bg); color:#123; }
-  header { background:linear-gradient(135deg,var(--dark),var(--blue)); color:#fff; padding:22px 16px; }
-  header h1 { margin:0 0 4px; font-size:1.6rem; } header p { margin:2px 0; opacity:.92; }
-  main { max-width:880px; margin:0 auto; padding:16px; }
-  .card { background:#fff; border-radius:12px; padding:16px; margin:14px 0; box-shadow:0 1px 4px rgba(0,0,0,.08); }
-  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; }
-  label { font-size:.85rem; font-weight:600; display:block; margin-bottom:4px; }
-  input, select { width:100%; padding:9px; border:1px solid #bcd; border-radius:8px; font-size:1rem; }
-  button { background:var(--blue); color:#fff; border:0; padding:12px 18px; border-radius:9px; font-size:1rem; cursor:pointer; }
-  button.secondary { background:#e8f1f7; color:var(--dark); }
-  .preset { margin-right:8px; margin-bottom:8px; }
-  #verdict { font-size:1.25rem; font-weight:700; padding:12px; border-radius:9px; display:none; }
-  .SAFE { background:#e5f5ea; color:var(--ok); } .CAUTION { background:#fdf3d7; color:var(--warn); } .UNSAFE { background:#fdecea; color:var(--bad); }
-  table { width:100%; border-collapse:collapse; font-size:.92rem; }
-  td, th { border-bottom:1px solid #e3ecf2; padding:7px 6px; text-align:left; }
-  .st-OK { color:var(--ok); font-weight:700; } .st-CAUTION { color:var(--warn); font-weight:700; } .st-UNSAFE { color:var(--bad); font-weight:700; }
-  #trace { font-family:ui-monospace, Menlo, Consolas, monospace; font-size:.82rem; background:#0d2231; color:#cfe8f5; border-radius:9px; padding:12px; white-space:pre-wrap; max-height:320px; overflow:auto; }
-  #trace .t { color:#7fd1ff; }
-  pre#report { white-space:pre-wrap; background:#fbfcfd; border:1px dashed #9db8c6; border-radius:9px; padding:12px; font-size:.9rem; }
-  .stat { text-align:center; } .stat b { font-size:1.35rem; color:var(--blue); display:block; }
-  footer { text-align:center; color:#567; font-size:.85rem; padding:18px; }
+  :root{
+    --abyss:#03222e;
+    --deep:#074b61;
+    --lagoon:#0b7591;
+    --aqua:#2fb3a6;
+    --aqua-bright:#6fe3d2;
+    --foam:#e9f4f1;
+    --paper:#f4f9f8;
+    --ink:#0a2733;
+    --ink-soft:#3d5a64;
+    --line:#cfe0dc;
+    --safe:#14713f;   --safe-bg:#e2f4e9;   --safe-line:#9fd4b4;
+    --caution:#8a5a00; --caution-bg:#fbf0cd; --caution-line:#e7cd84;
+    --bad:#ac2a1e;    --bad-bg:#fbe8e3;    --bad-line:#f0b3aa;
+    --font-display:"Bricolage Grotesque","Hind",system-ui,sans-serif;
+    --font-body:"Hind",system-ui,"Segoe UI",sans-serif;
+    --font-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  }
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:var(--font-body); font-size:17px; line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{ background:var(--aqua); color:#fff; }
+
+  /* ---------- Hero: deep water ---------- */
+  header{
+    position:relative; overflow:hidden; color:#fff;
+    background:
+      radial-gradient(62rem 30rem at 88% -12%, rgba(47,179,166,.38), rgba(47,179,166,0) 60%),
+      radial-gradient(52rem 28rem at -12% 115%, rgba(11,117,145,.55), rgba(11,117,145,0) 62%),
+      linear-gradient(158deg, #073a4d 0%, var(--abyss) 72%);
+    padding:34px 20px 0;
+  }
+  header::before{ /* rising bubbles */
+    content:""; position:absolute; inset:0; pointer-events:none;
+    background-image:radial-gradient(rgba(255,255,255,.13) 1.5px, rgba(255,255,255,0) 1.7px);
+    background-size:26px 26px;
+    -webkit-mask-image:linear-gradient(160deg, transparent 30%, #000 90%);
+            mask-image:linear-gradient(160deg, transparent 30%, #000 90%);
+  }
+  .hero-inner{ position:relative; max-width:880px; margin:0 auto; padding-bottom:64px; }
+  .brand{ display:flex; align-items:center; justify-content:space-between; gap:16px; }
+  .wordmark{ display:flex; align-items:center; gap:10px; font-family:var(--font-display);
+             font-weight:800; font-size:1.45rem; letter-spacing:-.01em; }
+  .brand .event{ font-size:.86rem; color:rgba(255,255,255,.72); text-align:right; }
+  header h1{
+    font-family:var(--font-display); font-weight:800;
+    font-size:clamp(2.55rem, 6.2vw, 4.15rem); line-height:1.02; letter-spacing:-.02em;
+    margin:52px 0 18px; max-width:12em; text-wrap:balance;
+  }
+  .lede{ font-size:1.13rem; line-height:1.6; color:rgba(255,255,255,.86); max-width:57ch; margin:0; text-wrap:pretty; }
+  .hero-meta{ display:flex; flex-wrap:wrap; gap:10px; margin-top:28px; }
+  .chip{
+    background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.22);
+    -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px);
+    border-radius:999px; padding:7px 15px; font-size:.92rem; color:rgba(255,255,255,.94);
+  }
+  .chip b{ color:var(--aqua-bright); font-weight:600; }
+  .drop-art{ position:absolute; right:-30px; top:110px; width:300px; height:340px;
+             pointer-events:none; opacity:.95; }
+  .ripple{ transform-origin:150px 268px; animation:ripple 4.2s ease-out infinite; }
+  .ripple.r2{ animation-delay:1.4s; } .ripple.r3{ animation-delay:2.8s; }
+  @keyframes ripple{ 0%{ transform:scale(.55); opacity:.55; } 70%{ opacity:.14; } 100%{ transform:scale(1.25); opacity:0; } }
+  .wave{ display:block; width:100%; height:52px; margin-bottom:-1px; position:relative; }
+
+  main{ max-width:880px; margin:0 auto; padding:10px 20px 8px; }
+
+  /* ---------- Why this matters ---------- */
+  .stats-band{ padding:30px 2px 6px; }
+  .stats-band h2, .step-head h2{
+    font-family:var(--font-display); font-weight:700; letter-spacing:-.01em;
+    font-size:1.55rem; margin:0; color:var(--ink);
+  }
+  .stats{ display:grid; grid-template-columns:repeat(4,1fr); gap:22px; margin:22px 0 18px; }
+  .stat{ border-top:3px solid var(--lagoon); padding-top:12px; font-size:.94rem; color:var(--ink-soft); line-height:1.45; }
+  .stat b{ display:block; font-family:var(--font-display); font-weight:800;
+           font-size:1.85rem; letter-spacing:-.02em; color:var(--deep); margin-bottom:3px; }
+  .stats-band p{ color:var(--ink-soft); max-width:68ch; margin:0; text-wrap:pretty; }
+
+  /* ---------- The field sheet (steps 1–5) ---------- */
+  .sheet{
+    background:#fff; border:1px solid var(--line); border-radius:20px;
+    box-shadow:0 1px 2px rgba(3,34,46,.05), 0 16px 36px -18px rgba(3,34,46,.25);
+    padding:6px 34px 30px; margin:30px 0 10px;
+  }
+  .step{ padding:28px 0 30px; }
+  .step + .step{ border-top:1px solid var(--foam); box-shadow:0 -1px 0 var(--line); }
+  .step-head{ display:flex; align-items:center; gap:14px; margin-bottom:16px; }
+  .step-num{
+    flex:0 0 auto; width:36px; height:36px; border-radius:50%;
+    background:linear-gradient(160deg, var(--lagoon), var(--deep)); color:#fff;
+    font-family:var(--font-display); font-weight:800; font-size:1.05rem;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:inset 0 -3px 6px rgba(0,0,0,.18), 0 2px 6px rgba(7,75,97,.3);
+  }
+  .step > p{ color:var(--ink-soft); margin:0 0 16px; max-width:66ch; text-wrap:pretty; }
+
+  .grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(155px, 1fr)); gap:14px; }
+  .field label{ display:block; font-size:.86rem; font-weight:600; color:var(--deep); margin-bottom:5px; }
+  input, select{
+    width:100%; padding:11px 13px; font:inherit; font-size:1rem; color:var(--ink);
+    background:#fbfdfe; border:1.5px solid var(--line); border-radius:10px;
+    transition:border-color .15s ease, box-shadow .15s ease, background .15s ease;
+  }
+  input::placeholder{ color:#8aa5ad; }
+  input:hover, select:hover{ border-color:#aec9c3; }
+  input:focus, select:focus{ outline:none; border-color:var(--lagoon); background:#fff;
+    box-shadow:0 0 0 3.5px rgba(11,117,145,.22); }
+  :focus-visible{ outline:3px solid rgba(11,117,145,.55); outline-offset:2px; }
+
+  button{
+    font:inherit; cursor:pointer; border:0; border-radius:11px;
+    transition:transform .12s ease, box-shadow .15s ease, background .15s ease, border-color .15s ease;
+  }
+  button.secondary{
+    background:var(--foam); color:var(--deep); border:1px solid var(--line);
+    padding:10px 16px; font-weight:600; font-size:.95rem;
+  }
+  button.secondary:hover{ border-color:var(--lagoon); background:#e0efeb; }
+  button.secondary:active{ transform:translateY(1px); }
+  .preset{ margin:0 8px 14px 0; border-radius:999px; }
+  .run-wrap{ margin:20px 0 2px; }
+  .run-btn{
+    background:linear-gradient(180deg, var(--lagoon), var(--deep)); color:#fff;
+    font-weight:700; font-size:1.08rem; padding:15px 30px; width:100%;
+    box-shadow:0 10px 22px -10px rgba(7,75,97,.65), inset 0 1px 0 rgba(255,255,255,.25);
+  }
+  .run-btn:hover{ transform:translateY(-1px); box-shadow:0 14px 26px -10px rgba(7,75,97,.7), inset 0 1px 0 rgba(255,255,255,.25); }
+  .run-btn:active{ transform:translateY(1px); }
+
+  /* ---------- Trace console ---------- */
+  #trace{
+    font-family:var(--font-mono); font-size:.84rem; line-height:1.6;
+    background:
+      radial-gradient(40rem 14rem at 90% -30%, rgba(47,179,166,.22), rgba(47,179,166,0) 60%),
+      linear-gradient(165deg, #06384a, var(--abyss) 75%);
+    color:#d3ecf5; border-radius:14px; padding:18px; white-space:pre-wrap;
+    max-height:360px; overflow:auto;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.09), inset 0 0 0 1px rgba(111,227,210,.14);
+  }
+  #trace .t{ color:var(--aqua-bright); font-weight:500; }
+  #trace::-webkit-scrollbar{ width:9px; } #trace::-webkit-scrollbar-thumb{ background:#155e75; border-radius:6px; }
+
+  /* ---------- Verdict & findings ---------- */
+  #verdict{
+    display:none; font-family:var(--font-display); font-weight:700;
+    font-size:1.32rem; line-height:1.35; letter-spacing:-.01em;
+    padding:18px 20px; border-radius:14px; border:1.5px solid transparent;
+  }
+  #verdict.SAFE{ background:var(--safe-bg); color:var(--safe); border-color:var(--safe-line); animation:verdict-in .45s cubic-bezier(.2,.9,.3,1.2) both; }
+  #verdict.CAUTION{ background:var(--caution-bg); color:var(--caution); border-color:var(--caution-line); animation:verdict-in .45s cubic-bezier(.2,.9,.3,1.2) both; }
+  #verdict.UNSAFE{ background:var(--bad-bg); color:var(--bad); border-color:var(--bad-line); animation:verdict-in .45s cubic-bezier(.2,.9,.3,1.2) both; }
+  @keyframes verdict-in{ from{ opacity:0; transform:translateY(8px) scale(.985); } to{ opacity:1; transform:none; } }
+
+  #findings{ margin-top:8px; overflow-x:auto; }
+  #findings table{ width:100%; border-collapse:collapse; font-size:.95rem; min-width:560px; }
+  #findings th{
+    text-align:left; font-weight:600; font-size:.83rem; color:var(--ink-soft);
+    padding:10px 8px; border-bottom:2px solid var(--line); white-space:nowrap;
+  }
+  #findings td{ padding:12px 8px; border-bottom:1px solid #e6efec; vertical-align:top; line-height:1.5; }
+  #findings td em{ color:var(--ink-soft); font-size:.9em; }
+  .st-OK{ color:var(--safe); font-weight:700; white-space:nowrap; }
+  .st-CAUTION{ color:var(--caution); font-weight:700; white-space:nowrap; }
+  .st-UNSAFE{ color:var(--bad); font-weight:700; white-space:nowrap; }
+  .st-OK::before, .st-CAUTION::before, .st-UNSAFE::before{
+    content:""; display:inline-block; width:8px; height:8px; border-radius:50%;
+    background:currentColor; margin-right:7px; vertical-align:1px;
+  }
+
+  /* ---------- Report ---------- */
+  pre#report{
+    white-space:pre-wrap; word-break:break-word;
+    background:#fff; border:1px solid var(--line); border-top:4px solid var(--lagoon);
+    border-radius:10px; padding:18px; margin:0 0 14px;
+    font-family:var(--font-mono), var(--font-body); font-size:.88rem; line-height:1.65; color:var(--ink);
+  }
+
+  footer{ text-align:center; color:var(--ink-soft); font-size:.88rem; line-height:1.6; padding:22px 20px 30px; }
+  footer b{ color:var(--deep); }
+
+  /* ---------- Small screens ---------- */
+  @media (max-width:1100px){
+    .drop-art{ width:230px; height:260px; opacity:.5; }
+  }
+  @media (max-width:700px){
+    .stats{ grid-template-columns:repeat(2,1fr); }
+    .sheet{ padding:4px 19px 24px; border-radius:16px; }
+    .drop-art{ width:190px; height:220px; right:-56px; top:150px; opacity:.55; }
+    .brand .event{ display:none; }
+    header h1{ margin-top:38px; }
+    .run-btn{ padding:16px 20px; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior:auto; }
+    .ripple{ animation:none; opacity:.25; }
+    #verdict.SAFE, #verdict.CAUTION, #verdict.UNSAFE{ animation:none; }
+    button{ transition:none; }
+  }
 </style>
 </head>
 <body>
 <header>
-  <h1>💧 JalDost — Clean Water Safety Agent</h1>
-  <p>An agentic assistant for ASHA workers, ANMs and Village Water &amp; Sanitation Committees.</p>
-  <p>Enter field-test-kit (FTK) readings → the agent checks them against BIS IS 10500:2012, explains the risk, plans the fix, and drafts a bilingual report. 100% offline, no data leaves the phone.</p>
+  <div class="hero-inner">
+    <div class="brand">
+      <div class="wordmark">
+        <svg width="27" height="33" viewBox="0 0 24 30" aria-hidden="true"><path d="M12 1C12 1 2.5 12.6 2.5 19a9.5 9.5 0 0 0 19 0C21.5 12.6 12 1 12 1Z" fill="#2fb3a6"/><ellipse cx="8.6" cy="19.5" rx="2.1" ry="3.4" fill="#ffffff" opacity=".45" transform="rotate(-18 8.6 19.5)"/></svg>
+        JalDost
+      </div>
+      <div class="event">Code for a Billion — Bharat Agentic-AI Hackathon 2026 · Health track</div>
+    </div>
+    <h1>Is this water safe to drink?</h1>
+    <p class="lede">JalDost is a clean-water safety agent for frontline health workers. Enter field-test-kit (FTK) readings → the agent checks them against BIS IS 10500:2012, explains the risk, plans the fix, and drafts a bilingual report.</p>
+    <div class="hero-meta">
+      <span class="chip">For <b>ASHA workers, ANMs</b> &amp; Village Water &amp; Sanitation Committees</span>
+      <span class="chip"><b>100% offline</b> — no data leaves the phone</span>
+    </div>
+  </div>
+  <svg class="drop-art" viewBox="0 0 300 340" aria-hidden="true">
+    <defs>
+      <linearGradient id="dropGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#57d9c5"/><stop offset="1" stop-color="#0b7591"/>
+      </linearGradient>
+    </defs>
+    <ellipse class="ripple"    cx="150" cy="268" rx="86" ry="17" fill="none" stroke="#6fe3d2" stroke-width="2"/>
+    <ellipse class="ripple r2" cx="150" cy="268" rx="86" ry="17" fill="none" stroke="#6fe3d2" stroke-width="2"/>
+    <ellipse class="ripple r3" cx="150" cy="268" rx="86" ry="17" fill="none" stroke="#6fe3d2" stroke-width="2"/>
+    <ellipse cx="150" cy="268" rx="86" ry="17" fill="none" stroke="#6fe3d2" stroke-width="2" opacity=".35"/>
+    <path d="M150 18C150 18 62 128 62 182a88 88 0 0 0 176 0C238 128 150 18 150 18Z" fill="url(#dropGrad)" opacity=".92"/>
+    <ellipse cx="118" cy="180" rx="15" ry="30" fill="#ffffff" opacity=".38" transform="rotate(-16 118 180)"/>
+  </svg>
+  <svg class="wave" viewBox="0 0 1440 60" preserveAspectRatio="none" aria-hidden="true"><path d="M0 34 C 240 62, 480 6, 720 22 C 960 38, 1200 58, 1440 26 L 1440 60 L 0 60 Z" fill="#f4f9f8"/></svg>
 </header>
 <main>
 
-  <div class="card">
+  <section class="stats-band">
     <h2>Why this matters</h2>
-    <div class="grid">
+    <div class="stats">
       <div class="stat"><b>600 million</b>people in India face high-to-extreme water stress (NITI Aayog)</div>
       <div class="stat"><b>~200,000</b>deaths every year from inadequate access to safe water (NITI Aayog)</div>
       <div class="stat"><b>387 districts</b>have parts where groundwater nitrate exceeds safe limits (CGWB)</div>
       <div class="stat"><b>276 districts</b>have parts with excess fluoride in groundwater (CGWB)</div>
     </div>
     <p>Village FTK testing already happens under the Jal Jeevan Mission — but a raw reading means nothing to a health worker without the standards, the health meaning, and the next action. JalDost's agent supplies all three in under a minute.</p>
-  </div>
+  </section>
 
-  <div class="card">
-    <h2>1 · Water source</h2>
-    <div class="grid">
-      <div><label>Source name</label><input id="srcName" value="Handpump No. 3"></div>
-      <div><label>Village</label><input id="srcVillage" value="Rampur"></div>
-      <div><label>District</label><input id="srcDistrict" value="Nagaur"></div>
-      <div><label>Source type</label>
-        <select id="srcType"><option>Handpump</option><option>Open well</option><option>Tap (piped supply)</option><option>Borewell</option><option>Pond / surface</option></select></div>
-      <div><label>Tested by</label><input id="srcTester" value="ASHA worker (FTK)"></div>
-    </div>
-  </div>
+  <div class="sheet">
 
-  <div class="card">
-    <h2>2 · Field-test-kit readings</h2>
-    <p>Try a sample village, or type your own readings. Leave a field blank and watch the agent flag the data gap itself.</p>
-    <div>
-      <button class="secondary preset" onclick="loadPreset('safe')">Sample A — Safe source</button>
-      <button class="secondary preset" onclick="loadPreset('fluoride')">Sample B — Fluoride belt</button>
-      <button class="secondary preset" onclick="loadPreset('contaminated')">Sample C — Contaminated well</button>
-    </div>
-    <div class="grid">
-      <div><label>pH (6.5–8.5)</label><input id="f_ph" type="number" step="0.1" placeholder="e.g. 7.2"></div>
-      <div><label>TDS mg/L (≤500)</label><input id="f_tds" type="number" placeholder="e.g. 320"></div>
-      <div><label>Turbidity NTU (≤1)</label><input id="f_turbidity" type="number" step="0.1" placeholder="e.g. 0.8"></div>
-      <div><label>Nitrate mg/L (≤45)</label><input id="f_nitrate" type="number" placeholder="e.g. 12"></div>
-      <div><label>Fluoride mg/L (≤1.0)</label><input id="f_fluoride" type="number" step="0.1" placeholder="e.g. 0.6"></div>
-      <div><label>Iron mg/L (≤0.3)</label><input id="f_iron" type="number" step="0.01" placeholder="e.g. 0.1"></div>
-      <div><label>Coliform / E. coli</label>
-        <select id="f_coliform"><option value="">— not tested —</option><option value="absent">Absent</option><option value="present">Present</option></select></div>
-    </div>
-    <p><button onclick="runAgent()">▶ Run the Water Safety Agent</button></p>
-  </div>
+    <section class="step">
+      <div class="step-head"><span class="step-num">1</span><h2>Water source</h2></div>
+      <div class="grid">
+        <div class="field"><label for="srcName">Source name</label><input id="srcName" value="Handpump No. 3"></div>
+        <div class="field"><label for="srcVillage">Village</label><input id="srcVillage" value="Rampur"></div>
+        <div class="field"><label for="srcDistrict">District</label><input id="srcDistrict" value="Nagaur"></div>
+        <div class="field"><label for="srcType">Source type</label>
+          <select id="srcType"><option>Handpump</option><option>Open well</option><option>Tap (piped supply)</option><option>Borewell</option><option>Pond / surface</option></select></div>
+        <div class="field"><label for="srcTester">Tested by</label><input id="srcTester" value="ASHA worker (FTK)"></div>
+      </div>
+    </section>
 
-  <div class="card">
-    <h2>3 · Agent reasoning trace</h2>
-    <div id="trace">The agent's tool calls will appear here — perceive → look up standards → assess → compute risk → plan → report.</div>
-  </div>
+    <section class="step">
+      <div class="step-head"><span class="step-num">2</span><h2>Field-test-kit readings</h2></div>
+      <p>Try a sample village, or type your own readings. Leave a field blank and watch the agent flag the data gap itself.</p>
+      <div>
+        <button class="secondary preset" onclick="loadPreset('safe')">Sample A — Safe source</button>
+        <button class="secondary preset" onclick="loadPreset('fluoride')">Sample B — Fluoride belt</button>
+        <button class="secondary preset" onclick="loadPreset('contaminated')">Sample C — Contaminated well</button>
+      </div>
+      <div class="grid">
+        <div class="field"><label for="f_ph">pH (6.5–8.5)</label><input id="f_ph" type="number" step="0.1" placeholder="e.g. 7.2"></div>
+        <div class="field"><label for="f_tds">TDS mg/L (≤500)</label><input id="f_tds" type="number" placeholder="e.g. 320"></div>
+        <div class="field"><label for="f_turbidity">Turbidity NTU (≤1)</label><input id="f_turbidity" type="number" step="0.1" placeholder="e.g. 0.8"></div>
+        <div class="field"><label for="f_nitrate">Nitrate mg/L (≤45)</label><input id="f_nitrate" type="number" placeholder="e.g. 12"></div>
+        <div class="field"><label for="f_fluoride">Fluoride mg/L (≤1.0)</label><input id="f_fluoride" type="number" step="0.1" placeholder="e.g. 0.6"></div>
+        <div class="field"><label for="f_iron">Iron mg/L (≤0.3)</label><input id="f_iron" type="number" step="0.01" placeholder="e.g. 0.1"></div>
+        <div class="field"><label for="f_coliform">Coliform / E. coli</label>
+          <select id="f_coliform"><option value="">— not tested —</option><option value="absent">Absent</option><option value="present">Present</option></select></div>
+      </div>
+      <p class="run-wrap"><button class="run-btn" onclick="runAgent()">▶ Run the Water Safety Agent</button></p>
+    </section>
 
-  <div class="card">
-    <h2>4 · Verdict &amp; findings</h2>
-    <div id="verdict"></div>
-    <div id="findings" style="margin-top:10px;"></div>
-  </div>
+    <section class="step">
+      <div class="step-head"><span class="step-num">3</span><h2>Agent reasoning trace</h2></div>
+      <div id="trace">The agent's tool calls will appear here — perceive → look up standards → assess → compute risk → plan → report.</div>
+    </section>
 
-  <div class="card">
-    <h2>5 · Field report (English + Hindi) — forward to PHC / Gram Panchayat</h2>
-    <pre id="report">Run the agent to generate the report.</pre>
-    <button class="secondary" onclick="copyReport()">Copy report</button>
+    <section class="step">
+      <div class="step-head"><span class="step-num">4</span><h2>Verdict &amp; findings</h2></div>
+      <div id="verdict"></div>
+      <div id="findings"></div>
+    </section>
+
+    <section class="step">
+      <div class="step-head"><span class="step-num">5</span><h2>Field report (English + Hindi) — forward to PHC / Gram Panchayat</h2></div>
+      <pre id="report">Run the agent to generate the report.</pre>
+      <button class="secondary" onclick="copyReport()">Copy report</button>
+    </section>
+
   </div>
 
 </main>
